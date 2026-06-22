@@ -1,0 +1,31 @@
+---
+description: Brisbane Crash ML Lab project constraints and handoff to autonomous build
+alwaysApply: true
+---
+
+# Brisbane Crash ML Lab
+
+This repository is the **Brisbane Crash ML Lab** (`crashlab`).
+
+## Specs
+
+- Binding plan: `PROJECT_OVERVIEW.md`
+- One-shot build prompt: `AUTONOMOUS_AGENT_PROMPT.md`
+- Pre-provisioned environment notes: `AGENT_SETUP.md`
+
+## When implementing the full build
+
+Use the project skill `.cursor/skills/brisbane-crash-build/SKILL.md`.
+
+## Non-negotiables
+
+- CPU-only classical ML; no default deep learning / CUDA
+- Raw data ≤ 50 MiB; prefer reusing pre-seeded `data/raw/brisbane_crashes_2015_2023.csv`
+- Never commit raw government data, secrets, or model binaries
+- Time-based whole-year validation; leakage denylist enforced by tests
+- No causal or operational road-safety claims
+
+## Current bootstrap state
+
+Environment, GitHub, uv lockfile, fixture, configs, and pre-seeded Brisbane extract are prepared.
+Package code beyond a CLI stub is **not** implemented — that is the autonomous agent's job.

@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+title: Brisbane Crash ML Lab
+message: >-
+  If you use this software or analyses derived from it, please cite it
+  and attribute the Queensland road-crash data under CC BY 4.0.
+type: software
+authors:
+  - name: Brisbane Crash ML Lab contributors
+version: 0.0.1
+license: MIT
+repository-code: https://github.com/jt-09/brisbane-crash-ml-lab
+abstract: >-
+  CPU-first reproducible machine-learning lab for Brisbane City road-crash
+  severity, anomaly, spatial, and count modelling using Queensland open data.
+keywords:
+  - road crashes
+  - Brisbane
+  - machine learning
+  - scikit-learn
+  - open data
+references:
+  - type: data
+    title: Crash data from Queensland roads
+    authors:
+      - name: Department of Transport and Main Roads
+        affiliation: State of Queensland
+    license: CC-BY-4.0
+    url: https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads

@@ -1,0 +1,16 @@
+# Smoke profile: fixture only, no network, under 5 minutes.
+inherits: base.yaml
+profile: smoke
+use_fixture: true
+fixture_path: data/samples/fixture.csv
+models:
+  binary: [dummy, logistic]
+  multiclass: [dummy]
+  ordinal: false
+  anomalies: [rules]
+  spatial: [grid]
+  counts: [seasonal_mean]
+tuning:
+  n_iter: 0
+  n_folds: 0
+  n_estimators_cap: 50
