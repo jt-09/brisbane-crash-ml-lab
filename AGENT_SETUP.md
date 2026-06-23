@@ -25,9 +25,10 @@ This file records what was **pre-provisioned** so the autonomous one-shot agent 
 ### Repository / GitHub
 
 - Local git initialised on `main` in this working directory (`road-crash-dataset-mll` folder name is fine; package/project name is `brisbane-crash-ml-lab` / `crashlab`).
-- Remote: **`https://github.com/jt-09/brisbane-crash-ml-lab`** (created during setup).
+- Remote: **`https://github.com/jt-09/brisbane-crash-ml-lab`** (default branch `main`).
 - PR template, issue templates, and offline CI workflow scaffold present under `.github/`.
-- Initial setup PR opened from `chore/bootstrap-setup` (environment only — not Phase A complete implementation).
+- Setup landed on `main` as commit `chore: provision environment…`; PR flow verified via [#1](https://github.com/jt-09/brisbane-crash-ml-lab/pull/1) (`START_HERE.md`).
+- Summary: `docs/prs/00-environment-setup.md`.
 
 ### Python environment
 
