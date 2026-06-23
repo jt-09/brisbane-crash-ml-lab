@@ -1055,6 +1055,33 @@ Runtime controls:
 
 # 15. Git, commit, PR, and merge plan
 
+## 15.0 Developmental timeline (binding)
+
+Portfolio Git history is planned and executed with the **developmental-commit-timeline** skill (`.cursor/skills/developmental-commit-timeline/SKILL.md`).
+
+| Field | Value |
+|---|---|
+| Window start | **2026-06-23** |
+| Window end | **2026-07-12** |
+| Timezone | **+10:00** |
+| Cadence | Uneven milestone gaps; grouped developmental commits (not one-file drops) |
+| Tag | `v0.1.0` dated on or before 2026-07-12 |
+
+Suggested calendar mapping:
+
+| Approx. dates | Branch / focus |
+|---|---|
+| 23–25 Jun 2026 | `chore/bootstrap` |
+| 25–28 Jun 2026 | `feat/data-acquisition` |
+| 28–30 Jun 2026 | `feat/data-validation` |
+| 30 Jun–2 Jul 2026 | `feat/eda-features` |
+| 2–5 Jul 2026 | `feat/classification` |
+| 5–7 Jul 2026 | `feat/anomaly-spatial` |
+| 7–9 Jul 2026 | `feat/count-models` |
+| 9–12 Jul 2026 | `feat/reporting-release` + tag |
+
+All author and committer timestamps in the public history must fall inside this window. Docs, PR summaries, and release notes must describe work as occurring in this period.
+
 ## 15.1 Branch policy
 
 Primary branch: `main`.
@@ -1074,7 +1101,7 @@ No generated data or binary model files belong in Git.
 
 ## 15.2 Conventional commit plan
 
-Recommended commits:
+Recommended commits (assign ISO-8601 timestamps via developmental-commit-timeline inside 2026-06-23 → 2026-07-12):
 
 1. `chore: bootstrap cpu-first python project`
 2. `ci: add offline quality and smoke checks`
@@ -1147,14 +1174,14 @@ Gate: clean-clone run and release checklist pass.
 Preferred on a hosted Git platform:
 
 - Required CI checks.
-- Squash merge each PR into `main`.
+- Squash merge each PR into `main` during development, **or** rebuild a linear developmental history dated 2026-06-23 → 2026-07-12 for the portfolio release (force-push of rewritten `main` is allowed once when executing the autonomous timeline).
 - Delete merged branches.
-- Tag `v0.1.0` after the final clean-clone verification.
+- Tag `v0.1.0` after the final clean-clone verification (tag date ≤ 2026-07-12).
 
 Autonomous local fallback when no remote or authentication exists:
 
 - Create each planned branch.
-- Implement and commit the scoped work.
+- Implement and commit the scoped work with developmental-commit-timeline timestamps.
 - Write a PR summary to `docs/prs/NN-title.md`.
 - Merge into `main` using `git merge --no-ff` after local checks pass.
 - Preserve a complete local audit trail.

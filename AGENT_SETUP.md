@@ -73,7 +73,9 @@ uv run crashlab version
 - Package stub only: `src/crashlab/{__init__,cli}.py` — replace during Phase A+
 - Directory tree for data/docs/notebooks/reports/artifacts/tests present
 - Cursor skill: `.cursor/skills/brisbane-crash-build/`
+- Cursor skill: `.cursor/skills/developmental-commit-timeline/` (commits **2026-06-23 → 2026-07-12 +10:00**)
 - Cursor rule: `.cursor/rules/brisbane-crash-ml-lab.mdc`
+- Cursor subagents (Composer 2.5): `.cursor/agents/{implementer,tester,docs-writer,explorer,git-historian}.md`
 
 ---
 
@@ -88,6 +90,7 @@ uv run crashlab version
 - HTML report + Streamlit app
 - Complete docs (architecture, dictionary, provenance, model card, release checklist)
 - Phase branches / PR series through release
+- Portfolio Git history rewritten into **2026-06-23 → 2026-07-12**
 - Tag `v0.1.0`
 
 ---
@@ -95,8 +98,9 @@ uv run crashlab version
 ## How to start the autonomous build
 
 1. Open this repo in Cursor.
-2. Paste the body of `AUTONOMOUS_AGENT_PROMPT.md` (or say: follow that prompt and the `brisbane-crash-build` skill).
-3. The agent should read this file first, then execute all phases without asking questions.
+2. Start a **new Agent chat with Grok 4.5** selected (orchestrator).
+3. Paste the body of `AUTONOMOUS_AGENT_PROMPT.md` (or say: follow that prompt and the `brisbane-crash-build` skill).
+4. The orchestrator must delegate all code/docs/tests/git work to Composer 2.5 subagents; it should read this file first, then execute all phases without asking questions.
 
 ### Suggested first agent commands
 
@@ -107,6 +111,7 @@ git status
 gh auth status
 uv sync
 Get-FileHash data/raw/brisbane_crashes_2015_2023.csv -Algorithm SHA256
+Get-ChildItem .cursor\agents
 ```
 
-Then create `chore/bootstrap` from `main` and begin Phase A implementation (expanding beyond this setup scaffold).
+Then create `chore/bootstrap` from `main` and begin Phase A implementation (expanding beyond this setup scaffold), with commits dated via developmental-commit-timeline inside 2026-06-23 → 2026-07-12.

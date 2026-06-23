@@ -1,14 +1,53 @@
 # Autonomous one-shot build prompt
 
-Copy the prompt below into a capable coding agent that has terminal, filesystem, Git, and internet access.
+Copy the prompt below into a **Grok 4.5** Cursor agent chat (orchestrator). Subagents are pinned to **Composer 2.5**. The agent needs terminal, filesystem, Git, and internet access.
+
+**Before pasting:** open a new Agent chat and select **Grok 4.5** as the chat model. Do not start this prompt under Composer as the parent.
 
 ---
 
-You are the principal data engineer, machine-learning engineer, statistician, QA engineer, technical writer, and release engineer for a new repository named `brisbane-crash-ml-lab`.
+You are the **orchestrating principal engineer** for a repository named `brisbane-crash-ml-lab`. You coordinate data engineering, ML, statistics, QA, technical writing, and release work — but you do **not** write the implementation yourself.
 
-Your mission is to autonomously create the entire repository, download a bandwidth-limited Brisbane road-crash dataset, implement all planned pipelines and experiments, verify them, create a professional Git history, and leave the project in a portfolio-ready `v0.1.0` state.
+Your mission is to autonomously finish the entire repository from the pre-provisioned baseline (`START_HERE.md`, `AGENT_SETUP.md`), reuse the bandwidth-limited Brisbane road-crash extract when the SHA-256 matches, implement all planned pipelines and experiments via Composer 2.5 workers, verify them, create a professional developmental Git history dated **2026-06-23 → 2026-07-12 (+10:00)**, and leave the project in a portfolio-ready `v0.1.0` state.
 
 Do not stop to ask questions. Do not request confirmation. Make sensible engineering decisions within the requirements below, document any necessary deviation, and continue until every achievable acceptance criterion is satisfied. Do not merely write a plan: execute it.
+
+## 0. Model / delegation policy (mandatory)
+
+You are the **orchestrator only**, running as **Grok 4.5**.
+
+1. Do **not** write, edit, or format project source yourself. Do not use `Write` / `StrReplace` / `EditNotebook` on application code, tests, configs, or docs — delegate those edits.
+2. Delegate **all** implementation, tests, configs, documentation, and git-history execution to project subagents under `.cursor/agents/` (all pinned to Composer 2.5):
+   - `implementer` — source, package, configs, Makefile, CI wiring
+   - `tester` — unit/integration/regression tests and check runs
+   - `docs-writer` — README, architecture, PR summaries, model card, build log prose
+   - `explorer` — read-only inspection (readonly)
+   - `git-historian` — developmental commit timeline planning and execution
+3. When using the Task tool for ad-hoc workers, always pass `model: "composer-2.5"` (never omit — omit inherits Grok). Prefer the named custom agents above; their frontmatter uses `model: composer-2.5[fast=false]`.
+4. Your job: read specs, plan phases, spawn Composer 2.5 workers with full context, verify their results, decide next steps, keep `artifacts/manifests/build_log.md` accurate via `docs-writer` / short orchestrator notes.
+5. You may run short read-only inspection yourself; any file creation/change goes through Composer 2.5.
+6. Follow `.cursor/skills/brisbane-crash-build/SKILL.md` and `.cursor/skills/developmental-commit-timeline/SKILL.md`.
+
+## 0b. Developmental Git timeline (mandatory)
+
+All portfolio Git history, commit plans in docs, PR narratives, and overview language must use the **developmental-commit-timeline** skill with this fixed window:
+
+| Field | Value |
+|---|---|
+| Start | `2026-06-23` |
+| End | `2026-07-12` |
+| Timezone | `+10:00` |
+| Style | Developmental milestones (not one-file drops); conventional commits |
+
+Rules:
+
+1. Read and follow `.cursor/skills/developmental-commit-timeline/SKILL.md` for planning, preflight, PowerShell commit helpers, and validation.
+2. Author **and** committer dates for the public history must fall in **2026-06-23 → 2026-07-12** (inclusive), with uneven gaps.
+3. Map phases/branches to that calendar (bootstrap near 23–25 Jun; acquisition/validation late Jun; modelling early Jul; reporting/release by **12 Jul**).
+4. Existing Jul-14 environment-setup commits are scaffolding only. **Rebuild** the public commit history into the Jun 23–Jul 12 window (fold setup into early bootstrap milestones). Force-pushing rewritten `main` to `origin` is explicitly allowed for this portfolio timeline; record the rewrite in `artifacts/manifests/build_log.md`.
+5. Delegate timeline planning/execution to the `git-historian` subagent (Composer 2.5). Orchestrator approves the plan internally and continues — do not ask the user.
+6. Never commit raw data, secrets, model binaries, or caches.
+7. `v0.1.0` annotated tag date must also fall on or before `2026-07-12T23:59:59+10:00`.
 
 ## 1. Non-interactive operating rules
 
@@ -390,30 +429,32 @@ Software gates:
 
 ## 11. Git execution plan
 
+Use the **developmental-commit-timeline** skill. Public history must span **2026-06-23 → 2026-07-12 (+10:00)** with uneven milestone spacing. Delegate commit planning/execution to the `git-historian` (Composer 2.5) subagent.
+
 Use conventional commits and the following branches in order:
 
-1. `chore/bootstrap`
-2. `feat/data-acquisition`
-3. `feat/data-validation`
-4. `feat/eda-features`
-5. `feat/classification`
-6. `feat/anomaly-spatial`
-7. `feat/count-models`
-8. `feat/reporting-release`
+1. `chore/bootstrap` — ~2026-06-23 to 2026-06-25
+2. `feat/data-acquisition` — ~2026-06-25 to 2026-06-28
+3. `feat/data-validation` — ~2026-06-28 to 2026-06-30
+4. `feat/eda-features` — ~2026-06-30 to 2026-07-02
+5. `feat/classification` — ~2026-07-02 to 2026-07-05
+6. `feat/anomaly-spatial` — ~2026-07-05 to 2026-07-07
+7. `feat/count-models` — ~2026-07-07 to 2026-07-09
+8. `feat/reporting-release` — ~2026-07-09 to 2026-07-12
 
 For every branch:
 
 1. Branch from current `main`.
-2. Implement only its phase scope.
+2. Implement only its phase scope via `implementer` / `tester` / `docs-writer`.
 3. Add tests and docs.
 4. Run relevant checks.
-5. Make one or more conventional commits.
+5. Make one or more conventional commits with backdated author/committer timestamps inside the window above.
 6. Create `docs/prs/NN-title.md` containing summary, changes, tests, metrics/runtime impact, risks, screenshots/artifacts, and checklist.
-7. If a valid existing GitHub remote and authenticated `gh` CLI are available, push the branch, create a PR, and use the repository's permitted merge flow after checks pass. Do not bypass protected rules.
+7. If a valid existing GitHub remote and authenticated `gh` CLI are available, push the branch, create a PR, and use the repository's permitted merge flow after checks pass. Do not bypass protected rules (except the single allowed portfolio history rewrite of `main` described in §0b).
 8. Otherwise merge locally into `main` using `git merge --no-ff` after checks pass.
 9. Delete local merged branches only if doing so does not reduce auditability; PR summaries must remain.
 
-Preferred commit sequence:
+Preferred commit sequence (timestamps assigned by `git-historian` inside the Jun 23–Jul 12 window):
 
 - `chore: bootstrap cpu-first python project`
 - `ci: add offline quality and smoke checks`

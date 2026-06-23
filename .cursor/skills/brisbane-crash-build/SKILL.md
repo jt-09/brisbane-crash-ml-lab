@@ -13,6 +13,13 @@ description: >-
 1. Read [`AGENT_SETUP.md`](../../../AGENT_SETUP.md) first — environment is **pre-provisioned**.
 2. Read [`PROJECT_OVERVIEW.md`](../../../PROJECT_OVERVIEW.md) completely — binding spec.
 3. Follow [`AUTONOMOUS_AGENT_PROMPT.md`](../../../AUTONOMOUS_AGENT_PROMPT.md) — execution contract.
+4. Follow [developmental-commit-timeline](../developmental-commit-timeline/SKILL.md) for all commits — window **2026-06-23 → 2026-07-12 (+10:00)**.
+
+## Orchestrator vs workers
+
+- **Parent chat model:** Grok 4.5 (orchestrator only — plan, delegate, verify).
+- **All code/docs/tests/git execution:** Composer 2.5 via `.cursor/agents/` (`implementer`, `tester`, `docs-writer`, `explorer`, `git-historian`).
+- Task tool calls must pass `model: "composer-2.5"` when not using a named agent.
 
 ## Do not re-do setup
 
@@ -51,18 +58,18 @@ If hash matches and size ≤ 50 MiB, **do not re-download**. Wire acquisition to
 
 ## Execution order
 
-Use planned branches and merge via GitHub PRs when `gh` works (preferred):
+Use planned branches and merge via GitHub PRs when `gh` works (preferred). Date public history with developmental-commit-timeline inside **2026-06-23 → 2026-07-12**:
 
-1. `chore/bootstrap`
-2. `feat/data-acquisition`
-3. `feat/data-validation`
-4. `feat/eda-features`
-5. `feat/classification`
-6. `feat/anomaly-spatial`
-7. `feat/count-models`
-8. `feat/reporting-release`
+1. `chore/bootstrap` (~23–25 Jun)
+2. `feat/data-acquisition` (~25–28 Jun)
+3. `feat/data-validation` (~28–30 Jun)
+4. `feat/eda-features` (~30 Jun–2 Jul)
+5. `feat/classification` (~2–5 Jul)
+6. `feat/anomaly-spatial` (~5–7 Jul)
+7. `feat/count-models` (~7–9 Jul)
+8. `feat/reporting-release` (~9–12 Jul; tag `v0.1.0` by 12 Jul)
 
-For each: implement → test → conventional commits → `docs/prs/NN-*.md` → `gh pr create` → merge after checks → continue.
+For each: `implementer` → `tester` → conventional backdated commits via `git-historian` → `docs/prs/NN-*.md` via `docs-writer` → `gh pr create` → merge after checks → continue. Rebuild scaffolding Jul-14 commits into the Jun–Jul window per the autonomous prompt.
 
 Keep `artifacts/manifests/build_log.md` updated throughout.
 

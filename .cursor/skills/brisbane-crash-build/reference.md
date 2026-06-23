@@ -15,6 +15,13 @@ gh auth status
 git remote -v
 ```
 
+## Developmental commit window
+
+- Skill: `.cursor/skills/developmental-commit-timeline/SKILL.md`
+- Start: `2026-06-23` / End: `2026-07-12` / TZ: `+10:00`
+- Subagent: `git-historian` (Composer 2.5)
+- Uneven milestone gaps; set `GIT_AUTHOR_DATE` and `GIT_COMMITTER_DATE`
+
 ## Preferred PR titles
 
 1. `chore: bootstrap cpu-first python project`

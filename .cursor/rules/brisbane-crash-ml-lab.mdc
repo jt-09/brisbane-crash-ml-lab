@@ -17,6 +17,15 @@ This repository is the **Brisbane Crash ML Lab** (`crashlab`).
 
 Use the project skill `.cursor/skills/brisbane-crash-build/SKILL.md`.
 
+## Model split
+
+- Orchestrator chat: **Grok 4.5** (plan / delegate / verify only).
+- All implementation subagents: **Composer 2.5** via `.cursor/agents/` (`implementer`, `tester`, `docs-writer`, `explorer`, `git-historian`).
+
+## Git timeline
+
+Use `.cursor/skills/developmental-commit-timeline/SKILL.md`. Public commits and `v0.1.0` must fall in **2026-06-23 → 2026-07-12 (+10:00)**.
+
 ## Non-negotiables
 
 - CPU-only classical ML; no default deep learning / CUDA
