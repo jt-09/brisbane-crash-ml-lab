@@ -1,6 +1,5 @@
-"""Brisbane Crash ML Lab — package stub for environment bootstrap.
+"""Brisbane Crash ML Lab — CPU-first road-crash ML pipeline."""
 
-The autonomous build agent replaces and expands this package per PROJECT_OVERVIEW.md.
-"""
+__version__ = "0.1.0a1"
 
-__version__ = "0.0.1"
+__all__ = ["__version__"]
