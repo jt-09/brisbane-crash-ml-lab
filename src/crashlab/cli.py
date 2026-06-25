@@ -9,6 +9,7 @@ import typer
 
 from crashlab import __version__
 from crashlab.config import VALID_PROFILES, load_config
+from crashlab.data.acquire import run_acquire
 from crashlab.logging import configure_logging, get_logger
 from crashlab.paths import ensure_dirs
 from crashlab.pipeline import PIPELINE_STAGES, run_all
@@ -99,9 +100,9 @@ def acquire(
     force: ForceOption = False,
 ) -> None:
     """Download or reuse Brisbane crash raw data."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("acquire")
+    config, paths = _bootstrap_context(profile)
+    result = run_acquire(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2))
 
 
 @app.command("validate")
