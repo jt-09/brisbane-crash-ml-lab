@@ -3,6 +3,8 @@ inherits: base.yaml
 profile: smoke
 use_fixture: true
 fixture_path: data/samples/fixture.csv
+# Never write fixture output to preseed_raw.path — use a dedicated smoke raw file.
+fixture_raw_path: data/raw/fixture_smoke.csv
 models:
   binary: [dummy, logistic]
   multiclass: [dummy]
