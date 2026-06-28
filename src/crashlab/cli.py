@@ -10,6 +10,8 @@ import typer
 from crashlab import __version__
 from crashlab.config import VALID_PROFILES, load_config
 from crashlab.data.acquire import run_acquire
+from crashlab.data.clean import run_prepare
+from crashlab.data.validate import run_validate
 from crashlab.logging import configure_logging, get_logger
 from crashlab.paths import ensure_dirs
 from crashlab.pipeline import PIPELINE_STAGES, run_all
@@ -111,9 +113,9 @@ def validate_cmd(
     force: ForceOption = False,
 ) -> None:
     """Validate raw or fixture data against the project contract."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("validate")
+    config, paths = _bootstrap_context(profile)
+    result = run_validate(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2))
 
 
 @app.command("prepare")
@@ -122,9 +124,9 @@ def prepare(
     force: ForceOption = False,
 ) -> None:
     """Clean and featurise data for modelling."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("prepare")
+    config, paths = _bootstrap_context(profile)
+    result = run_prepare(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2))
 
 
 @app.command("train-binary")

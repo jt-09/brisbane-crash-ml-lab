@@ -9,7 +9,9 @@ from typing import Any
 
 from crashlab.config import CrashlabConfig
 from crashlab.data.acquire import run_acquire
+from crashlab.data.clean import run_prepare
 from crashlab.data.manifest import write_run_manifest
+from crashlab.data.validate import run_validate
 from crashlab.logging import get_logger
 from crashlab.paths import CrashlabPaths, ensure_dirs
 
@@ -28,10 +30,12 @@ PIPELINE_STAGES: tuple[str, ...] = (
     "report",
 )
 
-IMPLEMENTED_STAGES: frozenset[str] = frozenset({"acquire"})
+IMPLEMENTED_STAGES: frozenset[str] = frozenset({"acquire", "validate", "prepare"})
 
 _STAGE_RUNNERS: dict[str, Callable[..., dict[str, Any]]] = {
     "acquire": run_acquire,
+    "validate": run_validate,
+    "prepare": run_prepare,
 }
 
 
@@ -44,7 +48,7 @@ def run_stage(
 ) -> dict[str, Any]:
     """Run a single pipeline stage when implemented."""
     if stage not in _STAGE_RUNNERS:
-        msg = f"Stage '{stage}' is not implemented yet (Phase B+)."
+        msg = f"Stage '{stage}' is not implemented yet (Phase D+)."
         raise NotImplementedError(msg)
     runner = _STAGE_RUNNERS[stage]
     return runner(config, paths, force=force)
@@ -81,7 +85,7 @@ def run_all(config: CrashlabConfig, *, force: bool = False) -> dict[str, float]:
         manifest_path,
         config,
         command="all",
-        status="completed_acquire",
+        status="completed_data_stages",
         timings=timings,
         extra={
             "stages": list(PIPELINE_STAGES),

@@ -20,6 +20,11 @@ def test_load_smoke_profile(repo_root: Path) -> None:
     assert config.use_fixture is True
     assert config.fixture_path is not None
     assert Path(config.fixture_path) == (repo_root / "data" / "samples" / "fixture.csv").resolve()
+    assert config.fixture_raw_path is not None
+    assert (
+        Path(config.fixture_raw_path)
+        == (repo_root / "data" / "raw" / "fixture_smoke.csv").resolve()
+    )
     assert config.project["seed"] == 42
     assert config.data["lga"] == "Brisbane City"
     assert config.models["binary"] == ["dummy", "logistic"]
