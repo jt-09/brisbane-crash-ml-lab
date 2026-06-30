@@ -1,3 +1,5 @@
 """Evaluation metrics, calibration, and reporting helpers."""
 
-__all__: list[str] = []
+from crashlab.evaluation.eda import run_eda
+
+__all__ = ["run_eda"]

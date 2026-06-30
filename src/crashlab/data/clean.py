@@ -11,6 +11,7 @@ import pandas as pd
 
 from crashlab.config import CrashlabConfig
 from crashlab.data.acquire import resolve_raw_input_path
+from crashlab.data.artifacts import processed_path, rejected_path
 from crashlab.data.manifest import utc_now_iso
 from crashlab.data.schema import (
     BRISBANE_LGA,
@@ -33,18 +34,8 @@ from crashlab.paths import CrashlabPaths
 
 logger = get_logger("data.clean")
 
-PROCESSED_NAME = "brisbane_crashes_cleaned.parquet"
-REJECTED_NAME = "brisbane_crashes_rejected.parquet"
 QUALITY_MANIFEST_NAME = "data_quality"
 SUMMARY_NAME = "data_quality_summary.md"
-
-
-def processed_path(paths: CrashlabPaths) -> Path:
-    return paths.processed_dir / PROCESSED_NAME
-
-
-def rejected_path(paths: CrashlabPaths) -> Path:
-    return paths.interim_dir / REJECTED_NAME
 
 
 def quality_json_path(paths: CrashlabPaths, profile: str) -> Path:
@@ -359,12 +350,22 @@ def run_prepare(
     quality_json = quality_json_path(paths, config.profile)
     quality_md = quality_summary_path(paths, config.profile)
 
-    if not force and out_parquet.is_file() and quality_json.is_file():
+    feature_manifest = paths.manifests_dir / f"features_{config.profile}.json"
+    eda_manifest = paths.manifests_dir / f"eda_{config.profile}.json"
+    if (
+        not force
+        and out_parquet.is_file()
+        and quality_json.is_file()
+        and feature_manifest.is_file()
+        and eda_manifest.is_file()
+    ):
         logger.info("Prepared outputs exist; skipping (use --force to re-run)")
         return {
             "status": "skipped",
             "processed_path": str(out_parquet),
             "quality_manifest": str(quality_json),
+            "features_manifest": str(feature_manifest),
+            "eda_manifest": str(eda_manifest),
         }
 
     if not raw_path.is_file():
@@ -399,6 +400,12 @@ def run_prepare(
     quality_md.parent.mkdir(parents=True, exist_ok=True)
     quality_md.write_text(render_quality_summary(report), encoding="utf-8")
 
+    from crashlab.evaluation.eda import run_eda
+    from crashlab.features.build import run_feature_build
+
+    feature_result = run_feature_build(config, paths, force=force, df=clean)
+    eda_result = run_eda(config, paths, force=force, df=clean)
+
     elapsed = time.perf_counter() - started
     logger.info(
         "Prepare complete: %d clean / %d rejected rows -> %s (%.2fs)",
@@ -415,5 +422,7 @@ def run_prepare(
         "quality_summary": str(quality_md),
         "clean_row_count": len(clean),
         "rejected_row_count": len(rejected),
+        "features": feature_result,
+        "eda": eda_result,
         "timings": {"prepare_seconds": elapsed},
     }

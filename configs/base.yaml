@@ -12,6 +12,11 @@ paths:
   artifacts_dir: artifacts
   reports_dir: reports
 
+splits:
+  train_year_end: 2021
+  val_years: [2022]
+  test_years: [2023]
+
 data:
   lga: Brisbane City
   year_start: 2015
