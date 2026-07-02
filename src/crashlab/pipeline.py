@@ -13,6 +13,7 @@ from crashlab.data.clean import run_prepare
 from crashlab.data.manifest import write_run_manifest
 from crashlab.data.validate import run_validate
 from crashlab.logging import get_logger
+from crashlab.models.binary import run_binary_training
 from crashlab.paths import CrashlabPaths, ensure_dirs
 
 logger = get_logger("pipeline")
@@ -30,12 +31,20 @@ PIPELINE_STAGES: tuple[str, ...] = (
     "report",
 )
 
-IMPLEMENTED_STAGES: frozenset[str] = frozenset({"acquire", "validate", "prepare"})
+IMPLEMENTED_STAGES: frozenset[str] = frozenset(
+    {
+        "acquire",
+        "validate",
+        "prepare",
+        "train-binary",
+    }
+)
 
 _STAGE_RUNNERS: dict[str, Callable[..., dict[str, Any]]] = {
     "acquire": run_acquire,
     "validate": run_validate,
     "prepare": run_prepare,
+    "train-binary": run_binary_training,
 }
 
 
@@ -85,7 +94,7 @@ def run_all(config: CrashlabConfig, *, force: bool = False) -> dict[str, float]:
         manifest_path,
         config,
         command="all",
-        status="completed_data_stages",
+        status="completed_implemented_stages",
         timings=timings,
         extra={
             "stages": list(PIPELINE_STAGES),

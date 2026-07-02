@@ -13,6 +13,7 @@ from crashlab.data.acquire import run_acquire
 from crashlab.data.clean import run_prepare
 from crashlab.data.validate import run_validate
 from crashlab.logging import configure_logging, get_logger
+from crashlab.models.binary import run_binary_training
 from crashlab.paths import ensure_dirs
 from crashlab.pipeline import PIPELINE_STAGES, run_all
 
@@ -135,9 +136,9 @@ def train_binary(
     force: ForceOption = False,
 ) -> None:
     """Train binary severity classifiers."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("train-binary")
+    config, paths = _bootstrap_context(profile)
+    result = run_binary_training(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2, default=str))
 
 
 @app.command("train-multiclass")
