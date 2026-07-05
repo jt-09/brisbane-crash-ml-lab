@@ -13,7 +13,9 @@ from crashlab.data.clean import run_prepare
 from crashlab.data.manifest import write_run_manifest
 from crashlab.data.validate import run_validate
 from crashlab.logging import get_logger
+from crashlab.models.anomalies import run_anomaly_detection
 from crashlab.models.binary import run_binary_training
+from crashlab.models.hotspots import run_hotspot_clustering
 from crashlab.models.multiclass import run_multiclass_training
 from crashlab.models.ordinal import ordinal_enabled, run_ordinal_training
 from crashlab.paths import CrashlabPaths, ensure_dirs
@@ -41,6 +43,8 @@ IMPLEMENTED_STAGES: frozenset[str] = frozenset(
         "train-binary",
         "train-multiclass",
         "train-ordinal",
+        "detect-anomalies",
+        "cluster-hotspots",
     }
 )
 
@@ -51,6 +55,8 @@ _STAGE_RUNNERS: dict[str, Callable[..., dict[str, Any]]] = {
     "train-binary": run_binary_training,
     "train-multiclass": run_multiclass_training,
     "train-ordinal": run_ordinal_training,
+    "detect-anomalies": run_anomaly_detection,
+    "cluster-hotspots": run_hotspot_clustering,
 }
 
 

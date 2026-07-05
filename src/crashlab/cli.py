@@ -13,7 +13,9 @@ from crashlab.data.acquire import run_acquire
 from crashlab.data.clean import run_prepare
 from crashlab.data.validate import run_validate
 from crashlab.logging import configure_logging, get_logger
+from crashlab.models.anomalies import run_anomaly_detection
 from crashlab.models.binary import run_binary_training
+from crashlab.models.hotspots import run_hotspot_clustering
 from crashlab.models.multiclass import run_multiclass_training
 from crashlab.models.ordinal import run_ordinal_training
 from crashlab.paths import ensure_dirs
@@ -171,9 +173,9 @@ def detect_anomalies(
     force: ForceOption = False,
 ) -> None:
     """Run anomaly and outlier detection."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("detect-anomalies")
+    config, paths = _bootstrap_context(profile)
+    result = run_anomaly_detection(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2, default=str))
 
 
 @app.command("cluster-hotspots")
@@ -182,9 +184,9 @@ def cluster_hotspots(
     force: ForceOption = False,
 ) -> None:
     """Cluster spatial crash hotspots."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("cluster-hotspots")
+    config, paths = _bootstrap_context(profile)
+    result = run_hotspot_clustering(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2, default=str))
 
 
 @app.command("train-counts")
