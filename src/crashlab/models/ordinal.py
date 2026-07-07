@@ -117,8 +117,8 @@ class StatsmodelsOrdinalClassifier(BaseEstimator, ClassifierMixin):
         self.feature_names_: list[str] | None = None
 
     def fit(self, X: np.ndarray, y: np.ndarray) -> StatsmodelsOrdinalClassifier:
-        from statsmodels.miscmodels.ordinal_model import (
-            OrderedModel,  # type: ignore[import-untyped]
+        from statsmodels.miscmodels.ordinal_model import (  # type: ignore[import-untyped]
+            OrderedModel,
         )
 
         X_arr = np.asarray(X, dtype=float)

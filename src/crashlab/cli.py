@@ -15,6 +15,7 @@ from crashlab.data.validate import run_validate
 from crashlab.logging import configure_logging, get_logger
 from crashlab.models.anomalies import run_anomaly_detection
 from crashlab.models.binary import run_binary_training
+from crashlab.models.counts import run_count_training
 from crashlab.models.hotspots import run_hotspot_clustering
 from crashlab.models.multiclass import run_multiclass_training
 from crashlab.models.ordinal import run_ordinal_training
@@ -195,9 +196,9 @@ def train_counts(
     force: ForceOption = False,
 ) -> None:
     """Train suburb-month crash count models."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("train-counts")
+    config, paths = _bootstrap_context(profile)
+    result = run_count_training(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2, default=str))
 
 
 @app.command("report")
