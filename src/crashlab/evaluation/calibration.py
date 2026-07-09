@@ -73,3 +73,52 @@ def apply_binary_threshold(y_proba: np.ndarray, threshold: float) -> np.ndarray:
     if proba.ndim == 2:
         proba = proba[:, 1]
     return (proba >= threshold).astype(int)
+
+
+def compare_calibration_methods(
+    estimator: ClassifierMixin,
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_val: np.ndarray,
+    y_val: np.ndarray,
+    X_eval: np.ndarray,
+    y_eval: np.ndarray,
+    *,
+    methods: tuple[CalibrationMethod | None, ...] = (None, "sigmoid", "isotonic"),
+) -> dict[str, Any]:
+    """Compare uncalibrated vs sigmoid vs isotonic calibration on held-out data."""
+    from sklearn.base import clone  # type: ignore[import-untyped]
+
+    rows: list[dict[str, Any]] = []
+    for method in methods:
+        fitted = clone(estimator)
+        fitted.fit(X_train, y_train)
+        label = "none" if method is None else method
+        if method is None:
+            working: ClassifierMixin = fitted
+        else:
+            working = fit_calibrated_classifier(fitted, X_val, y_val, method=method)
+        if not hasattr(working, "predict_proba"):
+            rows.append({"method": label, "skipped": True})
+            continue
+        proba = working.predict_proba(X_eval)
+        rows.append(
+            {
+                "method": label,
+                "brier": brier_score(y_eval, proba),
+                "calibration_curve": calibration_curve_data(y_eval, proba),
+                "note": "Calibration adjusts probability scale; not a causal intervention.",
+            }
+        )
+    best = min(
+        (r for r in rows if r.get("brier") is not None),
+        key=lambda r: float(r["brier"]),
+        default=None,
+    )
+    return {
+        "methods": rows,
+        "best_method": best.get("method") if best else None,
+        "interpretation_note": (
+            "Lower Brier score indicates better probabilistic calibration on the evaluation split."
+        ),
+    }

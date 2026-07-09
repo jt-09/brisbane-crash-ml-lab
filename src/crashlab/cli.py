@@ -12,6 +12,7 @@ from crashlab.config import VALID_PROFILES, load_config
 from crashlab.data.acquire import run_acquire
 from crashlab.data.clean import run_prepare
 from crashlab.data.validate import run_validate
+from crashlab.evaluation.reports import run_report
 from crashlab.logging import configure_logging, get_logger
 from crashlab.models.anomalies import run_anomaly_detection
 from crashlab.models.binary import run_binary_training
@@ -207,9 +208,9 @@ def report(
     force: ForceOption = False,
 ) -> None:
     """Generate evaluation reports and figures."""
-    _bootstrap_context(profile)
-    del force
-    _not_implemented("report")
+    config, paths = _bootstrap_context(profile)
+    result = run_report(config, paths, force=force)
+    typer.echo(json.dumps(result, indent=2, default=str))
 
 
 @app.command("all")

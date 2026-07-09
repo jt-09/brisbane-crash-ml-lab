@@ -360,7 +360,7 @@ def evaluate_binary_candidate(
 def persist_json(path: Path, payload: dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8") as handle:
-        json.dump(payload, handle, indent=2, sort_keys=True)
+        json.dump(payload, handle, indent=2, sort_keys=True, default=str)
         handle.write("\n")
 
 
