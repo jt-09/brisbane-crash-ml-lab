@@ -16,3 +16,8 @@ tuning:
   lof_sample_size: 5000
   kde_sample_size: 5000
   permutation_repeats: 5
+  bootstrap_samples: 100
+  pdp_max_features: 3
+  pdp_grid_points: 15
+  skip_ablations: false
+  seed_stability_repeats: 3

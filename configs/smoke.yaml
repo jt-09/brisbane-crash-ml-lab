@@ -16,3 +16,8 @@ tuning:
   n_iter: 0
   n_folds: 0
   n_estimators_cap: 50
+  permutation_repeats: 2
+  bootstrap_samples: 30
+  pdp_max_features: 2
+  skip_ablations: true
+  seed_stability_repeats: 1

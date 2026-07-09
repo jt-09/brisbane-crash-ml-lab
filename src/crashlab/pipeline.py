@@ -12,6 +12,7 @@ from crashlab.data.acquire import run_acquire
 from crashlab.data.clean import run_prepare
 from crashlab.data.manifest import write_run_manifest
 from crashlab.data.validate import run_validate
+from crashlab.evaluation.reports import run_report
 from crashlab.logging import get_logger
 from crashlab.models.anomalies import run_anomaly_detection
 from crashlab.models.binary import run_binary_training
@@ -47,6 +48,7 @@ IMPLEMENTED_STAGES: frozenset[str] = frozenset(
         "detect-anomalies",
         "cluster-hotspots",
         "train-counts",
+        "report",
     }
 )
 
@@ -60,6 +62,7 @@ _STAGE_RUNNERS: dict[str, Callable[..., dict[str, Any]]] = {
     "detect-anomalies": run_anomaly_detection,
     "cluster-hotspots": run_hotspot_clustering,
     "train-counts": run_count_training,
+    "report": run_report,
 }
 
 
