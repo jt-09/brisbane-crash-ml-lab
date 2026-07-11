@@ -23,6 +23,7 @@ ALL_SEVERITY_VALUES: Final[tuple[str, ...]] = SEVERITY_VALUES + (SEVERITY_PDO,)
 SEVERITY_ALIASES: Final[dict[str, str]] = {
     "fatal": "Fatal",
     "hospitalisation": "Hospitalisation",
+    "hospitalization": "Hospitalisation",
     "hospitalized": "Hospitalisation",
     "hospitalised": "Hospitalisation",
     "medical treatment": "Medical Treatment",
@@ -166,4 +167,9 @@ def normalize_severity(value: object) -> str | None:
     if text in ALL_SEVERITY_VALUES:
         return text
     lowered = text.lower()
-    return SEVERITY_ALIASES.get(lowered)
+    if lowered in SEVERITY_ALIASES:
+        return SEVERITY_ALIASES[lowered]
+    for canonical in ALL_SEVERITY_VALUES:
+        if canonical.lower() == lowered:
+            return canonical
+    return None

@@ -47,6 +47,29 @@ def test_normalize_severity_aliases() -> None:
     assert normalize_severity("Hospitalisation") == "Hospitalisation"
 
 
+def test_normalize_severity_ods_title_case_variants() -> None:
+    """OpenDataSoft uses title-case with lowercase trailing words."""
+    assert normalize_severity("Medical treatment") == "Medical Treatment"
+    assert normalize_severity("Minor injury") == "Minor Injury"
+    assert normalize_severity("medical treatment") == "Medical Treatment"
+    assert normalize_severity("minor injury") == "Minor Injury"
+
+
+def test_normalize_severity_american_spelling() -> None:
+    assert normalize_severity("Hospitalization") == "Hospitalisation"
+    assert normalize_severity("hospitalization") == "Hospitalisation"
+
+
+def test_normalize_severity_case_insensitive_canonical() -> None:
+    assert normalize_severity("FATAL") == "Fatal"
+    assert normalize_severity("property damage only") == "Property Damage Only"
+
+
+def test_normalize_severity_unknown_returns_none() -> None:
+    assert normalize_severity("Unknown severity") is None
+    assert normalize_severity("") is None
+
+
 def test_required_fields_subset_of_canonical_usage() -> None:
     assert "crash_ref_number" in REQUIRED_FIELDS
     assert "crash_severity" in REQUIRED_FIELDS

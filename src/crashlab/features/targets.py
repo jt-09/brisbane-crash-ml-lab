@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from crashlab.data.schema import SEVERITY_PDO, SEVERITY_VALUES
+from crashlab.data.schema import SEVERITY_PDO, SEVERITY_VALUES, normalize_severity
 
 BINARY_SEVERE: frozenset[str] = frozenset({"Fatal", "Hospitalisation"})
 
@@ -22,8 +22,10 @@ def filter_modeling_rows(df: pd.DataFrame) -> pd.DataFrame:
     """Return rows eligible for severity modelling (PDO already excluded upstream)."""
     if "crash_severity" not in df.columns:
         return df.copy()
-    mask = df["crash_severity"].isin(SEVERITY_VALUES)
-    return df.loc[mask].copy()
+    out = df.copy()
+    out["crash_severity"] = out["crash_severity"].map(normalize_severity)
+    mask = out["crash_severity"].isin(SEVERITY_VALUES)
+    return out.loc[mask].copy()
 
 
 def add_binary_target(df: pd.DataFrame) -> pd.DataFrame:
