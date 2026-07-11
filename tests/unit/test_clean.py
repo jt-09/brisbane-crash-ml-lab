@@ -81,3 +81,21 @@ def test_severity_mapping_retained_for_modelling_set() -> None:
     assert len(clean) == 2
     assert len(rejected) == 0
     assert set(clean["crash_severity"]) == {"Fatal", "Medical Treatment"}
+
+
+def test_ods_severity_variants_normalised_on_clean() -> None:
+    df = pd.DataFrame(
+        [
+            _base_row(crash_severity="Medical treatment"),
+            _base_row(crash_ref_number="FX0002", crash_severity="Minor injury"),
+            _base_row(crash_ref_number="FX0003", crash_severity="Hospitalization"),
+        ]
+    )
+    clean, rejected = split_clean_rejected(df, year_start=2015, year_end=2023)
+    assert len(clean) == 3
+    assert len(rejected) == 0
+    assert set(clean["crash_severity"]) == {
+        "Medical Treatment",
+        "Minor Injury",
+        "Hospitalisation",
+    }

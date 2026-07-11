@@ -13,10 +13,10 @@ from crashlab.config import CrashlabConfig
 from crashlab.data.acquire import resolve_raw_input_path
 from crashlab.data.manifest import utc_now_iso
 from crashlab.data.schema import (
-    ALL_SEVERITY_VALUES,
     BRISBANE_LGA,
     REQUIRED_FIELDS,
     normalize_column_name,
+    normalize_severity,
 )
 from crashlab.logging import get_logger
 from crashlab.paths import CrashlabPaths
@@ -67,7 +67,7 @@ def validate_raw_frame(
         severities = {
             str(value).strip() for value in df["crash_severity"].unique() if str(value).strip()
         }
-        unknown = sorted(sev for sev in severities if sev not in ALL_SEVERITY_VALUES)
+        unknown = sorted(sev for sev in severities if normalize_severity(sev) is None)
         if unknown:
             issues.append(f"unknown_severity:{','.join(unknown[:10])}")
 
