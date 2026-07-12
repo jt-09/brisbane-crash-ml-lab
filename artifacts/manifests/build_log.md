@@ -45,3 +45,9 @@
 - Release checklist and PR-06 docs finalised on `feat/reporting-release`.
 - Smoke and standard data-quality summary reports committed under `reports/`.
 - Full offline test suite: **84 passed** (`pytest tests/`); ruff clean.
+
+## Portfolio history rewrite (2026-07-12)
+
+- Rebuilt public `main` as a linear 14-commit developmental timeline (2026-06-23 → 2026-07-12, +10:00).
+- Expanded squash-merged PR commits (#2–#7) into phase commits from `feat/reporting-release`; final tree matches pre-rewrite `origin/main`.
+- Annotated tag `v0.1.0` marks the initial release at 2026-07-12T19:45:11+10:00.
