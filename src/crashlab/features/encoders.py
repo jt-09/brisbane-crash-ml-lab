@@ -3,9 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
+from sklearn.impute import SimpleImputer  # type: ignore[import-untyped]
+
+if TYPE_CHECKING:
+    from sklearn.impute import SimpleImputer as SimpleImputerType
 
 
 @dataclass
@@ -46,6 +51,8 @@ class EncoderBundle:
     encoders: dict[str, CategoryEncoderState] = field(default_factory=dict)
     numeric_columns: tuple[str, ...] = ()
     encoding: str = "one_hot"
+    imputer_: SimpleImputerType | None = None
+    feature_columns_: tuple[str, ...] = ()
 
     def feature_names(self) -> list[str]:
         names: list[str] = list(self.numeric_columns)
@@ -57,20 +64,7 @@ class EncoderBundle:
         return names
 
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
-        parts: list[pd.DataFrame] = []
-        for col in self.numeric_columns:
-            if col in df.columns:
-                parts.append(pd.to_numeric(df[col], errors="coerce").to_frame(name=col))
-        for col, encoder in self.encoders.items():
-            if col not in df.columns:
-                continue
-            if self.encoding == "frequency":
-                parts.append(encoder.transform_frequency(df[col]).to_frame())
-            else:
-                parts.append(encoder.transform_one_hot(df[col]))
-        if not parts:
-            return pd.DataFrame(index=df.index)
-        return pd.concat(parts, axis=1)
+        return transform_with_mixed_encoding(self, df)
 
 
 def _fit_category_encoder(
@@ -88,6 +82,72 @@ def _fit_category_encoder(
         min_count=min_count,
         frequency_map=frequency_map,
     )
+
+
+def _encode_dataframe(
+    bundle: EncoderBundle,
+    df: pd.DataFrame,
+    *,
+    high_cardinality_threshold: int = 30,
+) -> pd.DataFrame:
+    """Encode categoricals and numerics without imputation."""
+    parts: list[pd.DataFrame] = []
+    for col in bundle.numeric_columns:
+        if col in df.columns:
+            parts.append(pd.to_numeric(df[col], errors="coerce").to_frame(name=col))
+    for col, encoder in bundle.encoders.items():
+        if col not in df.columns:
+            continue
+        use_freq = len(encoder.categories) > high_cardinality_threshold or col in {
+            "loc_suburb",
+            "loc_abs_statistical_area_2",
+        }
+        if use_freq:
+            parts.append(encoder.transform_frequency(df[col]).to_frame())
+        else:
+            parts.append(encoder.transform_one_hot(df[col]))
+    if not parts:
+        return pd.DataFrame(index=df.index)
+    return pd.concat(parts, axis=1)
+
+
+def _align_feature_columns(raw: pd.DataFrame, feature_columns: tuple[str, ...]) -> pd.DataFrame:
+    """Ensure encoded matrix column order matches the train-fitted schema."""
+    aligned = raw.reindex(columns=list(feature_columns), fill_value=0.0)
+    return aligned.astype(np.float64)
+
+
+def _apply_imputer(
+    bundle: EncoderBundle,
+    raw: pd.DataFrame,
+) -> pd.DataFrame:
+    """Apply train-fitted imputer; fall back to zero-fill for legacy bundles."""
+    if bundle.feature_columns_:
+        raw = _align_feature_columns(raw, bundle.feature_columns_)
+    else:
+        raw = raw.astype(np.float64)
+
+    if bundle.imputer_ is not None:
+        imputed = bundle.imputer_.transform(raw)
+        imputed = np.nan_to_num(imputed, nan=0.0, posinf=0.0, neginf=0.0)
+        columns = list(bundle.feature_columns_) or list(raw.columns)
+        return pd.DataFrame(imputed, columns=columns, index=raw.index)
+
+    filled = raw.fillna(0.0)
+    return filled.astype(np.float64)
+
+
+def fit_imputer_on_train(bundle: EncoderBundle, train_df: pd.DataFrame) -> EncoderBundle:
+    """Fit median imputer on training-encoded features only."""
+    raw_train = _encode_dataframe(bundle, train_df)
+    if raw_train.empty:
+        return bundle
+    raw_train = raw_train.astype(np.float64)
+    imputer = SimpleImputer(strategy="median")
+    imputer.fit(raw_train)
+    bundle.imputer_ = imputer
+    bundle.feature_columns_ = tuple(raw_train.columns)
+    return bundle
 
 
 def fit_encoder_bundle(
@@ -110,7 +170,6 @@ def fit_encoder_bundle(
         encoder = _fit_category_encoder(train_df[col], column=col, min_count=min_count)
         encoders[col] = encoder
         if col_encoding == "frequency":
-            # Re-fit with frequency path marker via categories unchanged
             pass
     bundle_encoding = encoding
     if any(
@@ -120,11 +179,12 @@ def fit_encoder_bundle(
     ):
         bundle_encoding = "mixed"
 
-    return EncoderBundle(
+    bundle = EncoderBundle(
         encoders=encoders,
         numeric_columns=tuple(numeric_columns),
         encoding=bundle_encoding,
     )
+    return fit_imputer_on_train(bundle, train_df)
 
 
 def transform_with_mixed_encoding(
@@ -134,21 +194,5 @@ def transform_with_mixed_encoding(
     high_cardinality_threshold: int = 30,
 ) -> pd.DataFrame:
     """Transform using one-hot or frequency per column based on train cardinality."""
-    parts: list[pd.DataFrame] = []
-    for col in bundle.numeric_columns:
-        if col in df.columns:
-            parts.append(pd.to_numeric(df[col], errors="coerce").to_frame(name=col))
-    for col, encoder in bundle.encoders.items():
-        if col not in df.columns:
-            continue
-        use_freq = len(encoder.categories) > high_cardinality_threshold or col in {
-            "loc_suburb",
-            "loc_abs_statistical_area_2",
-        }
-        if use_freq:
-            parts.append(encoder.transform_frequency(df[col]).to_frame())
-        else:
-            parts.append(encoder.transform_one_hot(df[col]))
-    if not parts:
-        return pd.DataFrame(index=df.index)
-    return pd.concat(parts, axis=1)
+    raw = _encode_dataframe(bundle, df, high_cardinality_threshold=high_cardinality_threshold)
+    return _apply_imputer(bundle, raw)

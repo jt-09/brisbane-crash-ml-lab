@@ -345,7 +345,7 @@ def run_prepare(
     """Clean raw data and write Parquet outputs plus quality artifacts."""
     started = time.perf_counter()
     raw_path = resolve_raw_input_path(config, paths)
-    out_parquet = processed_path(paths)
+    out_parquet = processed_path(paths, config.profile)
     out_rejected = rejected_path(paths)
     quality_json = quality_json_path(paths, config.profile)
     quality_md = quality_summary_path(paths, config.profile)

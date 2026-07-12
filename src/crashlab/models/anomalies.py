@@ -45,8 +45,8 @@ def _configured_methods(config: CrashlabConfig) -> list[str]:
     return [str(m) for m in methods]
 
 
-def _load_modeling_frame(paths: CrashlabPaths) -> pd.DataFrame:
-    parquet = processed_path(paths)
+def _load_modeling_frame(paths: CrashlabPaths, profile: str) -> pd.DataFrame:
+    parquet = processed_path(paths, profile)
     if not parquet.is_file():
         msg = f"Processed parquet required: {parquet}"
         raise FileNotFoundError(msg)
@@ -272,7 +272,7 @@ def run_anomaly_detection(
     lof_sample = int(tuning.get("lof_sample_size", 5000))
     n_estimators = int(tuning.get("n_estimators_cap", 100))
 
-    df = _load_modeling_frame(paths)
+    df = _load_modeling_frame(paths, config.profile)
     logger.info("Anomaly detection on %d rows, methods=%s", len(df), methods)
 
     method_results: dict[str, Any] = {}

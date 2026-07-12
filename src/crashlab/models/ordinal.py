@@ -234,7 +234,9 @@ def run_ordinal_training(
                 estimator.fit(train.X.to_numpy(), train.y)
                 fit_seconds = time.perf_counter() - start_fit
                 eval_metrics = _evaluate_ordinal(estimator, datasets)
-                model_path = model_artifact_path(paths, "ordinal", moment, model_name)
+                model_path = model_artifact_path(
+                    paths, config.profile, "ordinal", moment, model_name
+                )
                 persist_model(model_path, estimator)
                 candidates.append(
                     {

@@ -39,7 +39,7 @@ def _load_metrics(profile: str, repo_root: str) -> dict:
 def _load_processed(profile: str, repo_root: str) -> pd.DataFrame | None:
     config = load_config(profile, repo_root=Path(repo_root))
     paths = ensure_dirs(config)
-    parquet = processed_path(paths)
+    parquet = processed_path(paths, config.profile)
     if not parquet.is_file():
         return None
     return pd.read_parquet(parquet)

@@ -63,12 +63,14 @@ def artifacts_metrics_dir(paths: CrashlabPaths) -> Path:
 
 def model_artifact_path(
     paths: CrashlabPaths,
+    profile: str,
     task: ModelFamily,
     moment: str,
     model_name: str,
 ) -> Path:
-    paths.models_dir.mkdir(parents=True, exist_ok=True)
-    return paths.models_dir / f"{task}_{moment}_{model_name}.joblib"
+    directory = paths.models_dir / profile
+    directory.mkdir(parents=True, exist_ok=True)
+    return directory / f"{task}_{moment}_{model_name}.joblib"
 
 
 def metrics_artifact_path(
@@ -115,12 +117,12 @@ def load_moment_datasets(
     target_col: str,
 ) -> dict[str, SplitDataset]:
     """Rebuild aligned feature matrices and labels for each temporal split."""
-    parquet = processed_path(paths)
+    parquet = processed_path(paths, config.profile)
     if not parquet.is_file():
         msg = f"Processed parquet required: {parquet}"
         raise FileNotFoundError(msg)
 
-    enc_path = encoder_path(paths, moment)
+    enc_path = encoder_path(paths, config.profile, moment)
     if not enc_path.is_file():
         msg = f"Encoder bundle required for moment {moment}: {enc_path}"
         raise FileNotFoundError(msg)

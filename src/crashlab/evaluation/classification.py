@@ -8,17 +8,16 @@ import numpy as np
 import pandas as pd
 from sklearn.metrics import (  # type: ignore[import-untyped]
     accuracy_score,
+    average_precision_score,
     balanced_accuracy_score,
     confusion_matrix,
     f1_score,
     mean_absolute_error,
-    precision_recall_curve,
     precision_recall_fscore_support,
     precision_score,
     recall_score,
     roc_auc_score,
 )
-from sklearn.metrics import auc as sklearn_auc  # type: ignore[import-untyped]
 
 try:
     from sklearn.metrics import cohen_kappa_score  # type: ignore[import-untyped]
@@ -43,8 +42,7 @@ def _safe_pr_auc(y_true: np.ndarray, y_score: np.ndarray) -> float | None:
     score = np.asarray(y_score)
     if score.ndim == 2 and score.shape[1] > 1:
         score = score[:, 1]
-    precision, recall, _ = precision_recall_curve(y_true_arr, score)
-    return float(sklearn_auc(recall, precision))
+    return float(average_precision_score(y_true_arr, score))
 
 
 def recall_at_top_risk_pct(

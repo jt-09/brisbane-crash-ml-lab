@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import numpy as np
 import pandas as pd
 
-from crashlab.models.counts import add_historical_lag_features, build_count_panel
+from crashlab.models.counts import (
+    _count_design_columns,
+    _glm_design_aligned,
+    add_historical_lag_features,
+    build_count_panel,
+)
 
 
 def _series_frame() -> pd.DataFrame:
@@ -49,3 +55,14 @@ def test_prev_month_count_is_strictly_prior() -> None:
         previous = ordered.iloc[i - 1]
         if current["loc_suburb"] == previous["loc_suburb"]:
             assert current["prev_month_count"] == previous["crash_count"]
+
+
+def test_count_design_aligns_val_columns_to_train() -> None:
+    panel = build_count_panel(_series_frame())
+    panel = add_historical_lag_features(panel, count_col="crash_count")
+    train = panel.loc[panel["crash_year"] <= 2021]
+    val = panel.loc[panel["crash_year"] == 2022]
+    design_columns = _count_design_columns(train)
+    val_design = _glm_design_aligned(val, design_columns)
+    assert list(val_design.columns) == design_columns
+    assert val_design.dtypes.apply(lambda dt: np.issubdtype(dt, np.floating)).all()

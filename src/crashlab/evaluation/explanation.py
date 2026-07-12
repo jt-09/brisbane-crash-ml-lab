@@ -350,7 +350,7 @@ def _load_champion_binary(
     model_name = champion.get("model_name")
     if not model_name:
         return None
-    artifact_path = model_artifact_path(paths, "binary", moment, str(model_name))
+    artifact_path = model_artifact_path(paths, config.profile, "binary", moment, str(model_name))
     if not artifact_path.is_file():
         return None
     bundle = joblib.load(artifact_path)
@@ -524,7 +524,7 @@ def _align_metadata_frame(
     from crashlab.features.targets import add_binary_target, add_multiclass_target
     from crashlab.features.temporal import assign_split_column, compute_year_splits
 
-    parquet = processed_path(paths)
+    parquet = processed_path(paths, config.profile)
     if not parquet.is_file():
         return pd.DataFrame(index=range(len(test_split.y)))
     df = pd.read_parquet(parquet)

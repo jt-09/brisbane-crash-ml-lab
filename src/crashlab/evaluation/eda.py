@@ -187,7 +187,7 @@ def run_eda(
         return {"status": "skipped", "manifest": str(marker)}
 
     if df is None:
-        parquet = processed_path(paths)
+        parquet = processed_path(paths, config.profile)
         if not parquet.is_file():
             msg = f"Cleaned parquet required for EDA: {parquet}"
             raise FileNotFoundError(msg)
