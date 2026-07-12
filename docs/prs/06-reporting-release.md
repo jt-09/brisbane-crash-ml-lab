@@ -44,3 +44,4 @@ Delivers Phase H/I reporting on branch `feat/reporting-release`. Static HTML rep
 - [x] Smoke integration including report stage
 - [x] No raw government data or model binaries committed
 - [x] Association language only; no operational road-safety claims
+- [x] v0.1.0 version bump and release checklist on `feat/reporting-release`
