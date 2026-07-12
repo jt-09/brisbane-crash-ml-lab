@@ -25,7 +25,7 @@ def test_smoke_anomaly_spatial_counts_on_fixture(repo_root: Path | None = None) 
     fixture = root / "data" / "samples" / "fixture.csv"
     raw = pd.read_csv(fixture, dtype=str, keep_default_na=False)
     clean, _ = split_clean_rejected(raw, year_start=2015, year_end=2023)
-    clean.to_parquet(processed_path(paths), index=False)
+    clean.to_parquet(processed_path(paths, config.profile), index=False)
 
     anomaly = run_anomaly_detection(config, paths, force=True)
     spatial = run_hotspot_clustering(config, paths, force=True)

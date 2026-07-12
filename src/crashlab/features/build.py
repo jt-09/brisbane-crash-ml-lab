@@ -51,7 +51,7 @@ logger = get_logger("features.build")
 
 FeatureMoment = Literal["context", "triage", "leakage_demo"]
 
-ENCODER_NAME = "feature_encoders_{moment}.joblib"
+ENCODER_NAME = "feature_encoders_{profile}_{moment}.joblib"
 MATRIX_NAME = "features_{moment}_{split}.parquet"
 MANIFEST_NAME = "features_{profile}.json"
 
@@ -164,16 +164,16 @@ def _resolve_year_splits(config: CrashlabConfig, years: list[int]) -> YearSplits
     )
 
 
-def features_dir(paths: CrashlabPaths) -> Path:
-    return paths.processed_dir / "features"
+def features_dir(paths: CrashlabPaths, profile: str) -> Path:
+    return paths.processed_dir / "features" / profile
 
 
-def encoder_path(paths: CrashlabPaths, moment: str) -> Path:
-    return paths.interim_dir / ENCODER_NAME.format(moment=moment)
+def encoder_path(paths: CrashlabPaths, profile: str, moment: str) -> Path:
+    return paths.interim_dir / ENCODER_NAME.format(profile=profile, moment=moment)
 
 
-def matrix_path(paths: CrashlabPaths, moment: str, split: str) -> Path:
-    return features_dir(paths) / MATRIX_NAME.format(moment=moment, split=split)
+def matrix_path(paths: CrashlabPaths, profile: str, moment: str, split: str) -> Path:
+    return features_dir(paths, profile) / MATRIX_NAME.format(moment=moment, split=split)
 
 
 def manifest_path(paths: CrashlabPaths, profile: str) -> Path:
@@ -242,7 +242,7 @@ def run_feature_build(
         return {"status": "skipped", "manifest": str(manifest)}
 
     if df is None:
-        parquet = processed_path(paths)
+        parquet = processed_path(paths, config.profile)
         if not parquet.is_file():
             msg = f"Cleaned parquet required before feature build: {parquet}"
             raise FileNotFoundError(msg)
@@ -256,7 +256,7 @@ def run_feature_build(
     year_splits = _resolve_year_splits(config, years)
     year_splits.validate_disjoint()
 
-    features_dir(paths).mkdir(parents=True, exist_ok=True)
+    features_dir(paths, config.profile).mkdir(parents=True, exist_ok=True)
     results: dict[str, Any] = {"moments": {}, "splits": year_splits.as_dict()}
 
     for moment in FEATURE_MOMENTS:
@@ -266,16 +266,16 @@ def run_feature_build(
             year_splits,
             min_count=2 if config.profile == "smoke" else 5,
         )
-        joblib.dump(bundle, encoder_path(paths, moment))
+        joblib.dump(bundle, encoder_path(paths, config.profile, moment))
         row_counts: dict[str, int] = {}
         for split_name, matrix in matrices.items():
-            out_path = matrix_path(paths, moment, split_name)
+            out_path = matrix_path(paths, config.profile, moment, split_name)
             matrix.to_parquet(out_path, compression="snappy", index=False)
             row_counts[split_name] = len(matrix)
         results["moments"][moment] = {
             "feature_names": feature_names,
             "row_counts": row_counts,
-            "encoder_path": str(encoder_path(paths, moment)),
+            "encoder_path": str(encoder_path(paths, config.profile, moment)),
         }
         logger.info(
             "Built %s features: %d columns, splits %s",

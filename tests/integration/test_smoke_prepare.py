@@ -38,7 +38,7 @@ def test_smoke_fixture_to_parquet_offline(repo_root: Path, monkeypatch) -> None:
     assert prepare_result.get("features", {}).get("status") == "completed"
     assert prepare_result.get("eda", {}).get("status") == "completed"
 
-    parquet = processed_path(paths)
+    parquet = processed_path(paths, config.profile)
     assert parquet.is_file()
     df = pd.read_parquet(parquet)
     assert len(df) >= 15

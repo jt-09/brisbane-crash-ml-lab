@@ -39,8 +39,8 @@ def _configured_models(config: CrashlabConfig) -> list[str]:
     return [str(m) for m in models]
 
 
-def _load_frame(paths: CrashlabPaths) -> pd.DataFrame:
-    parquet = processed_path(paths)
+def _load_frame(paths: CrashlabPaths, profile: str) -> pd.DataFrame:
+    parquet = processed_path(paths, profile)
     if not parquet.is_file():
         msg = f"Processed parquet required: {parquet}"
         raise FileNotFoundError(msg)
@@ -159,12 +159,25 @@ def _glm_design(df: pd.DataFrame) -> pd.DataFrame:
     month_dummies = pd.get_dummies(df["crash_month"].astype(int), prefix="m", drop_first=True)
     features = pd.DataFrame(
         {
-            "prev_month_count": df["prev_month_count"].fillna(0.0),
-            "seasonal_hist_mean": df["seasonal_hist_mean"].fillna(0.0),
+            "prev_month_count": pd.to_numeric(df["prev_month_count"], errors="coerce").fillna(0.0),
+            "seasonal_hist_mean": pd.to_numeric(df["seasonal_hist_mean"], errors="coerce").fillna(
+                0.0
+            ),
         },
         index=df.index,
     )
-    return pd.concat([features, month_dummies], axis=1)
+    design = pd.concat([features, month_dummies], axis=1)
+    return design.astype(np.float64)
+
+
+def _count_design_columns(train: pd.DataFrame) -> list[str]:
+    """Column schema for count GLM/HGB design matrices (fit on train only)."""
+    return list(_glm_design(train).columns)
+
+
+def _glm_design_aligned(df: pd.DataFrame, design_columns: list[str]) -> pd.DataFrame:
+    """Align encoded count design to train-fitted column order."""
+    return _glm_design(df).reindex(columns=design_columns, fill_value=0.0).astype(np.float64)
 
 
 def fit_predict_poisson_glm(
@@ -173,12 +186,16 @@ def fit_predict_poisson_glm(
     *,
     count_col: str,
 ) -> np.ndarray:
-    x_train = _glm_design(train)
-    x_test = _glm_design(test)
-    x_train = sm.add_constant(x_train, has_constant="add")
-    x_test = sm.add_constant(x_test, has_constant="add")
+    design_columns = _count_design_columns(train)
+    x_train = sm.add_constant(
+        _glm_design_aligned(train, design_columns), has_constant="add"
+    ).astype(np.float64)
+    x_test = sm.add_constant(_glm_design_aligned(test, design_columns), has_constant="add").astype(
+        np.float64
+    )
+    endog = pd.to_numeric(train[count_col], errors="coerce").fillna(0.0).to_numpy(dtype=float)
     model = sm.GLM(
-        train[count_col],
+        endog,
         x_train,
         family=sm.families.Poisson(),
     )
@@ -192,13 +209,17 @@ def fit_predict_negbin_glm(
     *,
     count_col: str,
 ) -> tuple[np.ndarray, dict[str, Any]]:
-    x_train = _glm_design(train)
-    x_test = _glm_design(test)
-    x_train = sm.add_constant(x_train, has_constant="add")
-    x_test = sm.add_constant(x_test, has_constant="add")
+    design_columns = _count_design_columns(train)
+    x_train = sm.add_constant(
+        _glm_design_aligned(train, design_columns), has_constant="add"
+    ).astype(np.float64)
+    x_test = sm.add_constant(_glm_design_aligned(test, design_columns), has_constant="add").astype(
+        np.float64
+    )
+    endog = pd.to_numeric(train[count_col], errors="coerce").fillna(0.0).to_numpy(dtype=float)
     from statsmodels.discrete.discrete_model import NegativeBinomial  # type: ignore[import-untyped]
 
-    model = NegativeBinomial(train[count_col], x_train)
+    model = NegativeBinomial(endog, x_train)
     result = model.fit(disp=False, maxiter=100)
     dispersion = float(getattr(result, "params", [0])[-1]) if hasattr(result, "params") else None
     return np.asarray(result.predict(x_test)), {"dispersion_param": dispersion}
@@ -212,14 +233,16 @@ def fit_predict_hgb_poisson(
     seed: int,
     max_iter: int,
 ) -> np.ndarray:
-    x_train = _glm_design(train)
-    x_test = _glm_design(test)
+    design_columns = _count_design_columns(train)
+    x_train = _glm_design_aligned(train, design_columns).to_numpy(dtype=np.float64)
+    x_test = _glm_design_aligned(test, design_columns).to_numpy(dtype=np.float64)
+    y_train = pd.to_numeric(train[count_col], errors="coerce").fillna(0.0).to_numpy(dtype=float)
     model = HistGradientBoostingRegressor(
         loss="poisson",
         max_iter=max_iter,
         random_state=seed,
     )
-    model.fit(x_train, train[count_col])
+    model.fit(x_train, y_train)
     pred = model.predict(x_test)
     return np.asarray(np.clip(pred, 0, None), dtype=float)
 
@@ -300,7 +323,7 @@ def run_count_training(
     model_names = _configured_models(config)
     max_iter = int(config.tuning.get("n_estimators_cap", 100))
 
-    df = _load_frame(paths)
+    df = _load_frame(paths, config.profile)
     panel = build_count_panel(df, target="crash_count")
     panel = add_historical_lag_features(panel, count_col="crash_count")
 

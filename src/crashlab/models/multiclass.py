@@ -179,7 +179,9 @@ def run_multiclass_training(
                     scoring="f1_macro",
                 )
                 eval_metrics = _evaluate_multiclass(fitted, datasets)
-                model_path = model_artifact_path(paths, "multiclass", moment, model_name)
+                model_path = model_artifact_path(
+                    paths, config.profile, "multiclass", moment, model_name
+                )
                 persist_model(model_path, fitted)
                 candidates.append(
                     {

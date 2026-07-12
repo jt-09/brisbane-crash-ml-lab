@@ -57,8 +57,8 @@ def _configured_methods(config: CrashlabConfig) -> list[str]:
     return [str(m) for m in methods]
 
 
-def _load_spatial_frame(paths: CrashlabPaths) -> pd.DataFrame:
-    parquet = processed_path(paths)
+def _load_spatial_frame(paths: CrashlabPaths, profile: str) -> pd.DataFrame:
+    parquet = processed_path(paths, profile)
     if not parquet.is_file():
         msg = f"Processed parquet required: {parquet}"
         raise FileNotFoundError(msg)
@@ -309,7 +309,7 @@ def run_hotspot_clustering(
     kde_sample = int(tuning.get("kde_sample_size", 5000))
     use_kde = bool(tuning.get("kde", False)) or config.profile == "extended"
 
-    df = valid_coordinates(_load_spatial_frame(paths))
+    df = valid_coordinates(_load_spatial_frame(paths, config.profile))
     logger.info("Hotspot analysis on %d coordinate-valid rows", len(df))
 
     subset_results: dict[str, Any] = {}

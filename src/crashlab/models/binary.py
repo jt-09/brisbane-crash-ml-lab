@@ -165,7 +165,7 @@ def _train_one_binary_model(
         calibrate=True,
     )
 
-    model_path = model_artifact_path(paths, "binary", moment, model_name)
+    model_path = model_artifact_path(paths, config.profile, "binary", moment, model_name)
     persist_model(model_path, {"model": calibrated, "threshold": threshold, "moment": moment})
 
     candidate = {

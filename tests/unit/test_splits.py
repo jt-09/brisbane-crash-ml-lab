@@ -62,3 +62,5 @@ def test_encoders_fit_train_only() -> None:
     suburb_cols = [c for c in test_x.columns if c.startswith("loc_suburb")]
     assert suburb_cols
     assert test_x.loc[test.index[0], suburb_cols[0]] >= 0.0
+    assert not test_x.isna().any().any()
+    assert bundle.imputer_ is not None
