@@ -31,3 +31,17 @@
 - CLI `validate` and `prepare` commands wired; `crashlab all --profile smoke` reaches `status: completed_data_stages` offline with `CRASHLAB_ALLOW_NETWORK=0`.
 - Tests: **33 passed** (`pytest tests/`); includes integration `test_smoke_fixture_to_parquet_offline`.
 - Observed smoke `--force` runtime: ~0.20s total (acquire ~0.08s, validate ~0.01s, prepare ~0.07s on local Windows run).
+
+## Phase H — Feature imputation and profile isolation (2026-07-12)
+
+- Added train-fitted `SimpleImputer` (median) in `features/encoders.py`; legacy bundles zero-fill.
+- Profile-namespaced processed parquet, encoder, model, and metrics paths across data, features, and models.
+- Binary PR-AUC now uses `average_precision_score` instead of manual `precision_recall_curve` + `auc`.
+- Tests: path isolation, leakage guards, classification metrics, counts NaN handling.
+
+## Phase I — v0.1.0 release prep (2026-07-12)
+
+- Package version bumped to **0.1.0** (`pyproject.toml`, `crashlab.__version__`).
+- Release checklist and PR-06 docs finalised on `feat/reporting-release`.
+- Smoke and standard data-quality summary reports committed under `reports/`.
+- Full offline test suite: **84 passed** (`pytest tests/`); ruff clean.
