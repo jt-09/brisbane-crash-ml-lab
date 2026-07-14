@@ -1,6 +1,6 @@
 [project]
 name = "crashlab"
-version = "0.0.1"
+version = "0.1.0a1"
 description = "Brisbane road-crash ML lab (CPU-first, reproducible)"
 readme = "README.md"
 requires-python = ">=3.11,<3.13"
