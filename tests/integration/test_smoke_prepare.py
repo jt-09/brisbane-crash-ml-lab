@@ -9,7 +9,8 @@ import pytest
 
 from crashlab.config import load_config
 from crashlab.data.acquire import run_acquire
-from crashlab.data.clean import processed_path, run_prepare
+from crashlab.data.artifacts import processed_path
+from crashlab.data.clean import run_prepare
 from crashlab.data.validate import run_validate
 from crashlab.paths import ensure_dirs
 
@@ -34,6 +35,8 @@ def test_smoke_fixture_to_parquet_offline(repo_root: Path, monkeypatch) -> None:
     assert acquire_result["raw_path"].endswith("fixture_smoke.csv")
     assert validate_result["status"] == "completed"
     assert prepare_result["status"] == "completed"
+    assert prepare_result.get("features", {}).get("status") == "completed"
+    assert prepare_result.get("eda", {}).get("status") == "completed"
 
     parquet = processed_path(paths)
     assert parquet.is_file()
