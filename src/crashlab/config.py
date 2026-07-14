@@ -83,6 +83,9 @@ def _resolve_paths_in_config(repo_root: Path, config: dict[str, Any]) -> None:
     if isinstance(config.get("fixture_path"), str):
         config["fixture_path"] = _resolve_path_value(repo_root, config["fixture_path"])
 
+    if isinstance(config.get("fixture_raw_path"), str):
+        config["fixture_raw_path"] = _resolve_path_value(repo_root, config["fixture_raw_path"])
+
 
 def config_hash(config: dict[str, Any]) -> str:
     """Stable SHA-256 digest of the resolved configuration mapping."""
@@ -132,6 +135,11 @@ class CrashlabConfig:
     @property
     def fixture_path(self) -> str | None:
         value = self.raw.get("fixture_path")
+        return value if isinstance(value, str) else None
+
+    @property
+    def fixture_raw_path(self) -> str | None:
+        value = self.raw.get("fixture_raw_path")
         return value if isinstance(value, str) else None
 
     @property
