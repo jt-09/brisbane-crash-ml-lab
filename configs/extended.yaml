@@ -1,0 +1,10 @@
+# Extended profile: optional heavier workloads. Never the default.
+inherits: standard.yaml
+profile: extended
+tuning:
+  n_iter: 30
+  n_folds: 5
+  n_estimators_cap: 400
+  extra_seeds: true
+  one_class_svm: true
+  kde: true

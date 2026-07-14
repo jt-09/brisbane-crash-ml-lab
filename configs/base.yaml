@@ -1,0 +1,40 @@
+project:
+  name: brisbane-crash-ml-lab
+  seed: 42
+  random_seeds: [42, 7, 19]
+
+paths:
+  raw_dir: data/raw
+  interim_dir: data/interim
+  processed_dir: data/processed
+  external_dir: data/external
+  samples_dir: data/samples
+  artifacts_dir: artifacts
+  reports_dir: reports
+
+data:
+  lga: Brisbane City
+  year_start: 2015
+  year_end: 2023
+  year_min_expand: 2011
+  max_raw_bytes: 52428800
+  min_raw_bytes: 8388608
+  min_rows: 20000
+  exclude_preliminary_years: true
+  allow_large_download: false
+  opendatasoft:
+    base_url: https://queensland.opendatasoft.com/api/explore/v2.1
+    dataset_id: road-crash-locations-queensland
+  official:
+    dataset_url: https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads
+    resource_id: e88943c0-5968-4972-a15f-38e120d72ec0
+    resource_url: https://www.data.qld.gov.au/dataset/crash-data-from-queensland-roads/resource/e88943c0-5968-4972-a15f-38e120d72ec0
+    license: CC BY 4.0
+
+# Pre-seeded local raw file (gitignored). Prefer reuse over re-download.
+preseed_raw:
+  path: data/raw/brisbane_crashes_2015_2023.csv
+  years: [2015, 2023]
+  rows: 31046
+  bytes: 9907354
+  sha256: CE2A0435366E0870F238295CB9A2A700C12F6FFB25815B8D51ACA2A506CEFF22

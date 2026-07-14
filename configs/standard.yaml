@@ -1,0 +1,18 @@
+# Standard profile: real Brisbane subset, all tasks, <= 25 minutes target.
+inherits: base.yaml
+profile: standard
+use_fixture: false
+models:
+  binary: [dummy, logistic, decision_tree, random_forest, extra_trees, hist_gradient_boosting]
+  multiclass: [dummy, multinomial_logistic, extra_trees, hist_gradient_boosting]
+  ordinal: [cumulative_logistic, cumulative_hgb]
+  anomalies: [rules, robust_z, isolation_forest, lof]
+  spatial: [grid, dbscan, hdbscan]
+  counts: [overall_mean, seasonal_mean, previous_month, poisson, negbin, hgb_poisson]
+tuning:
+  n_iter: 15
+  n_folds: 3
+  n_estimators_cap: 200
+  lof_sample_size: 5000
+  kde_sample_size: 5000
+  permutation_repeats: 5

@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Sync dependencies
+        run: uv sync
+      - name: Ruff check
+        run: uv run ruff check .
+      - name: Ruff format
+        run: uv run ruff format --check .
+      - name: Typecheck
+        run: uv run mypy src
+      - name: Tests (offline)
+        run: uv run pytest
+        env:
+          # CI must never download government data
+          CRASHLAB_ALLOW_NETWORK: "0"
+      - name: CLI stub
+        run: uv run crashlab version

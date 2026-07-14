@@ -1,0 +1,53 @@
+# Local environments
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# Data (never commit government downloads or large intermediates)
+data/raw/*
+!data/raw/.gitkeep
+data/interim/*
+!data/interim/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/external/*
+!data/external/.gitkeep
+
+# Generated artifacts and reports (keep directory placeholders)
+artifacts/models/*
+!artifacts/models/.gitkeep
+artifacts/metrics/*
+!artifacts/metrics/.gitkeep
+artifacts/manifests/*
+!artifacts/manifests/.gitkeep
+reports/figures/*
+!reports/figures/.gitkeep
+reports/tables/*
+!reports/tables/.gitkeep
+reports/index.html
+
+# Streamlit secrets
+.streamlit/secrets.toml
